@@ -47,24 +47,30 @@ function getRandomMessage(category: keyof typeof OFFLINE_MESSAGES) {
     }
   }, [step]);
 
-  const handleDrawCard = async () => {
-    if (!ageGroup || !category) return;
-    setStep('loading');
-    setError(null);
-    try {
-      const message = getRandomMessage(category);
+ import { OFFLINE_MESSAGES } from "./constants"
 
-setReading({
-  message,
-});
+const handleDrawCard = () => {
+  if (!category) return
 
-setStep('result');
-    } catch (err) {
-      console.error(err);
-      setError("สัญญาณจากดวงจันทร์ขัดข้องชั่วคราว โปรดลองใหม่อีกครั้ง");
-      setStep('category');
-    }
-  };
+  const messages = OFFLINE_MESSAGES[
+    category === Category.CAREER_LEARNING ? "study" :
+    category === Category.LOVE_FRIENDSHIP ? "love" :
+    category === Category.HEALTH_WELLBEING ? "health" :
+    "luck"
+  ]
+
+  const randomIndex = Math.floor(Math.random() * messages.length)
+  const message = messages[randomIndex]
+
+  setReading({
+    name: "Moon Guidance",
+    imageUrl: "/moon-card.jpg", // หรือรูปเดิมที่คุณใช้
+    thaiMeaning: message,
+    thaiGuidance: message
+  })
+
+  setStep("result")
+}
 
   const handleShare = async () => {
     if (!reading) return;
