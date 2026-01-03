@@ -4,6 +4,7 @@ import { Sparkles, GraduationCap, Heart, Leaf, Star, ChevronLeft, RefreshCw, Loa
 import { AgeGroup, Category, TarotCardData } from './types';
 import { CARD_THEMES } from './constants';
 import { generateCardReading, generateCardImage } from './services/geminiService';
+import { OFFLINE_MESSAGES } from "./constants"
 
 const ageGroupTranslations: Record<AgeGroup, string> = {
   [AgeGroup.PRIMARY]: 'ประถมศึกษา (6–11 ปี)',
@@ -32,7 +33,11 @@ const App: React.FC = () => {
   const [reading, setReading] = useState<TarotCardData | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [tipIndex, setTipIndex] = useState(0);
-
+function getRandomMessage(category: keyof typeof OFFLINE_MESSAGES) {
+  const list = OFFLINE_MESSAGES[category]
+  const index = Math.floor(Math.random() * list.length)
+  return list[index]
+}
   useEffect(() => {
     if (step === 'loading') {
       const interval = setInterval(() => {
@@ -47,12 +52,13 @@ const App: React.FC = () => {
     setStep('loading');
     setError(null);
     try {
-      const themes = CARD_THEMES[category];
-      const randomTheme = themes[Math.floor(Math.random() * themes.length)];
-      const readingData = await generateCardReading(ageGroup, category, randomTheme);
-      const imageUrl = await generateCardImage(readingData.visualPrompt);
-      setReading({ ...readingData, imageUrl });
-      setStep('result');
+      const message = getRandomMessage(category);
+
+setReading({
+  message,
+});
+
+setStep('result');
     } catch (err) {
       console.error(err);
       setError("สัญญาณจากดวงจันทร์ขัดข้องชั่วคราว โปรดลองใหม่อีกครั้ง");
