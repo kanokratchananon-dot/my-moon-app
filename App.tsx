@@ -49,29 +49,40 @@ function getRandomMessage(category: keyof typeof OFFLINE_MESSAGES) {
 
  import { OFFLINE_MESSAGES } from "./constants"
 
-const handleDrawCard = () => {
-  if (!category) return
+const handleDrawCard = async () => {
+  if (!category) return;
 
-  const messages = OFFLINE_MESSAGES[
-    category === Category.CAREER_LEARNING ? "study" :
-    category === Category.LOVE_FRIENDSHIP ? "love" :
-    category === Category.HEALTH_WELLBEING ? "health" :
-    "luck"
-  ]
+  setStep("loading");
 
-  const randomIndex = Math.floor(Math.random() * messages.length)
-  const message = messages[randomIndex]
+  try {
+    const prompt = `ให้คำแนะนำเชิงบวกสำหรับนักเรียน เรื่อง ${category}`;
 
-  setReading({
-    name: "Moon Guidance",
-    imageUrl: "/moon-card.jpg", // หรือรูปเดิมที่คุณใช้
-    thaiMeaning: message,
-    thaiGuidance: message
-  })
+    const res = await fetch("/api/gemini", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ prompt }),
+    });
 
-  setStep("result")
-}
+    if (!res.ok) {
+      throw new Error("Server error");
+    }
 
+    const data = await res.json();
+
+    setReading({
+      name: "Moon Guidance",
+      imageUrl: "/moon-card.jpg",
+      thaiMeaning: data.text,
+      thaiGuidance: data.text,
+    });
+
+    setStep("result");
+  } catch (err) {
+    console.error(err);
+    setError("พลังจักรวาลขัดข้องเล็กน้อย ลองใหม่อีกครั้ง");
+    setStep("category");
+  }
+};
   const handleShare = async () => {
     if (!reading) return;
     const shareData = {
