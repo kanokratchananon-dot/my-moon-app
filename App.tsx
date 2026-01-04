@@ -49,39 +49,33 @@ function getRandomMessage(category: keyof typeof OFFLINE_MESSAGES) {
 
  import { OFFLINE_MESSAGES } from "./constants"
 
-const handleDrawCard = async () => {
+const handleDrawCard = () => {
   if (!category) return;
 
-  setStep("loading");
+  // เลือกชุดข้อความตามหมวด
+  const messages =
+    category === Category.CAREER_LEARNING
+      ? OFFLINE_MESSAGES.study
+      : category === Category.LOVE_FRIENDSHIP
+      ? OFFLINE_MESSAGES.love
+      : category === Category.HEALTH_WELLBEING
+      ? OFFLINE_MESSAGES.health
+      : OFFLINE_MESSAGES.luck;
 
-  try {
-    const prompt = `ให้คำแนะนำเชิงบวกสำหรับนักเรียน เรื่อง ${category}`;
+  // สุ่มข้อความ
+  const randomIndex = Math.floor(Math.random() * messages.length);
+  const message = messages[randomIndex];
 
-    const res = await fetch("/api/gemini", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ prompt }),
-    });
+  // ตั้งค่าผลลัพธ์
+  setReading({
+    name: "Moon Guidance",
+    imageUrl: "/moon-card.jpg", // หรือรูปที่คุณมี
+    thaiMeaning: message,
+    thaiGuidance: message,
+  });
 
-    if (!res.ok) {
-      throw new Error("Server error");
-    }
-
-    const data = await res.json();
-
-    setReading({
-      name: "Moon Guidance",
-      imageUrl: "/moon-card.jpg",
-      thaiMeaning: data.text,
-      thaiGuidance: data.text,
-    });
-
-    setStep("result");
-  } catch (err) {
-    console.error(err);
-    setError("พลังจักรวาลขัดข้องเล็กน้อย ลองใหม่อีกครั้ง");
-    setStep("category");
-  }
+  // ไปหน้าแสดงผล
+  setStep("result");
 };
   const handleShare = async () => {
     if (!reading) return;
